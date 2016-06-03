@@ -24,40 +24,109 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
 function Console (obj) {
-    this.element = obj.element;
-    this.width=obj.width;
-    this.height=obj.height;
-    this.bg=obj.bg;
+    if(!obj) obj = {};
+    this.element = (obj.element) ? obj.element : '#debug';
+    this.width=(obj.width) ? obj.width : '500';
+    this.height=(obj.height) ? obj.height : '100';
+    this.bg=(obj.bg) ? obj.bg : '#efefef';
+    this.padding=(obj.padding) ? obj.padding : '5';
+    this.search_border=(obj.search_border) ? obj.search_border : '1px SOLID #fefefe';
+    this.search_btn_border=(obj.search_btn_border) ? obj.search_btn_border : '1px SOLID #ffffff';
+    this.search_bg=(obj.search_bg) ? obj.search_bg : '#f8f8f8';
+    this.search_btn_bg=(obj.search_btn_bg) ? obj.search_btn_bg : '#fefefe';
+    this.search_color=(obj.search_color) ? obj.search_color : '#555';
+    this.search_btn_color=(obj.search_btn_color) ? obj.search_btn_color : '#888';
+    this.addSearchInput();
     this.applyCss();
 }
 
 Console.prototype.applyCss=function(){
-        $(this.element).css({
-            "width" : this.width+"px",
-            "height" : this.height+"px",
-            "overflow-y":"auto",
-            "background-color":this.bg
-        })
-    };
+    $(this.element).css({
+        "width" : this.width+"px",
+        "height" : this.height+"px",
+        "overflow-y":"auto",
+        "background-color":this.bg,
+        "padding":this.padding+"px"
+    })
+};
+
+Console.prototype.addSearchInput=function(){
+
+    var self = this;
+    $(this.element).append('<input name="JC_query" id="JC_query" type="text" size="30" maxlength="30"><input id="JC_searchit" type="button" value="Search">');
+
+    $(this.element).append('<div id="JC_consoleDiv"></div>');
+
+    $('#JC_query').css({
+        "border" : this.search_border,
+        "background-color" : this.search_bg,
+        "color":this.search_color
+    });
+    
+    $('#JC_searchit').css({
+        "border" : this.search_btn_border,
+        "background-color" : this.search_btn_bg,
+        "color":this.search_btn_color
+    })
+
+    $('#JC_searchit').click(function(e){
+        self.highlightSearch();
+
+    });
+
+    $("#JC_query").keyup(function(event){
+        if(event.keyCode == 13){
+            $("#JC_searchit").click();
+        }
+    });
+
+    var style = document.createElement('style');
+    style.type = 'text/css';
+    style.innerHTML = ' #JC_consoleDiv span { background-color:#FF9; color:#555; } \n ';
+    document.getElementsByTagName('head')[0].appendChild(style);
+
+
+
+};
+
+Console.prototype.highlightSearch=function(){
+
+    var text = $("#JC_query").val();
+    if(text!="")
+    {
+        var query = new RegExp("(\\b" + text + "\\b)", "gim");
+        var e = $('#JC_consoleDiv').html();
+        var enew = e.replace(/(<span>|<\/span>)/igm, "");
+        $('#JC_consoleDiv').html(enew);
+        var newe = enew.replace(query, "<span>$1</span>");
+        $('#JC_consoleDiv').html(newe);
+    }
+    else{
+        var e = $('#JC_consoleDiv').html();
+        var enew = e.replace(/(<span>|<\/span>)/igm, "");
+        $('#JC_consoleDiv').html(enew);
+    }
+
+};
 
 Console.prototype.log = function(msg){
     var d = new Date()
-    $(this.element).append("<p>"+this.formatDate(d,'hh:mm:ss')+":"+msg+"</p>");
+    $('#JC_consoleDiv').append("<p>"+this.formatDate(d,'hh:mm:ss')+":"+msg+"</p>");
 }
 
 Console.prototype.error = function(msg){
     var d = new Date()
-    $(this.element).append("<p style='color:#dd4444'>"+this.formatDate(d,'hh:mm:ss')+":"+msg+"</p>");
+    $('#JC_consoleDiv').append("<p style='color:#dd4444'>"+this.formatDate(d,'hh:mm:ss')+":"+msg+"</p>");
 }
 
 Console.prototype.success = function(msg){
     var d = new Date()
-    $(this.element).append("<p style='color:#44aa44'>"+this.formatDate(d,'hh:mm:ss')+":"+msg+"</p>");
+    $('#JC_consoleDiv').append("<p style='color:#44aa44'>"+this.formatDate(d,'hh:mm:ss')+":"+msg+"</p>");
 }
 
 Console.prototype.warning = function(msg){
     var d = new Date()
-    $(this.element).append("<p style='color:#ddaa00'>"+this.formatDate(d,'hh:mm:ss')+":"+msg+"</p>");
+    $('#JC_consoleDiv').append("<p style='color:#ddaa00'>"+this.formatDate(d,'hh:mm:ss')+":"+msg+"</p>");
 }
 
 Console.prototype.formatDate = function(date, format, utc) {
@@ -142,3 +211,13 @@ Console.prototype.formatDate = function(date, format, utc) {
 
     return format;
 };
+
+Console.prototype.show = function(msg){
+
+    $(this.element).show();
+}
+
+Console.prototype.hide = function(msg){
+
+    $(this.element).hide();
+}
